@@ -1,0 +1,18 @@
+{
+  "compilerOptions": {
+    "module": "none",
+    "sourceMap": true,
+    "target": "es5",
+    "outDir": "./dist",
+    "outFile": "./dist/performance-array.js",
+    "declaration": true,
+    "noImplicitAny": true
+  },
+  "files": [
+    "./src/PerformanceArray"
+  ],
+  "exclude": [
+    "./dist/**/*"
+  ],
+  "compileOnSave": true
+}

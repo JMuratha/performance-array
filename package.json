@@ -1,0 +1,36 @@
+{
+  "name": "performance-array",
+  "version": "0.0.1",
+  "description": "A solution to have more perfomant access to your Array data by using indices.",
+  "main": "index.js",
+  "scripts": {
+    "test": "npx tsc -p tsconfig.spec.json && npx mocha ./dist/performance-array.spec.js",
+    "build": "npx tsc",
+    "build-watch": "npx tsc --watch"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/JMuratha/performance-array.git"
+  },
+  "keywords": [
+    "array",
+    "performance",
+    "index",
+    "indices"
+  ],
+  "author": "Jan Muratha",
+  "license": "GPL-3.0-or-later",
+  "bugs": {
+    "url": "https://github.com/JMuratha/performance-array/issues"
+  },
+  "homepage": "https://github.com/JMuratha/performance-array#readme",
+  "devDependencies": {
+    "@types/chai": "^4.1.5",
+    "chai": "^4.1.2",
+    "typescript": "^3.0.3"
+  },
+  "dependencies": {
+    "@types/mocha": "^5.2.5",
+    "@types/node": "^10.10.1"
+  }
+}
