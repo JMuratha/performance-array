@@ -13,7 +13,14 @@ declare namespace PerformanceArray {
         private _options;
         constructor(arrayData: Array<T>, options?: IPerformanceArrayOptions);
         item(i: number): T;
+        remove(item: T): void;
+        push(item: T): void;
+        pop(): T | undefined;
+        unshift(item: T): void;
+        shift(): T | undefined;
+        splice(index: number, deleteCount: number, ...insertItems: Array<T>): Array<T>;
         toArray(): Array<T>;
+        readonly length: number;
     }
 }
 declare const expect: Chai.ExpectStatic;
@@ -22,9 +29,6 @@ declare namespace PerformanceArray {
         private _options;
         private static _availableKeyInfos;
         constructor(options: IPerformanceArrayOptions);
-        /**
-         * return true if the options object is valid, else it will throw an exception with a description
-         */
         validate(): boolean;
         private _validateObject;
         private _validateKeyValue;

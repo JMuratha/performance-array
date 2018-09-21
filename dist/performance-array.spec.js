@@ -1,7 +1,6 @@
-/// <reference path="./IPerformanceArrayOptions.ts" />
 var PerformanceArray;
 (function (PerformanceArray_1) {
-    var PerformanceArray = /** @class */ (function () {
+    var PerformanceArray = (function () {
         function PerformanceArray(arrayData, options) {
             this._arrayData = arrayData;
             this._options = options ? options : {};
@@ -9,16 +8,46 @@ var PerformanceArray;
         PerformanceArray.prototype.item = function (i) {
             return this._arrayData[i];
         };
+        PerformanceArray.prototype.remove = function (item) {
+            var index = this._arrayData.indexOf(item);
+            if (index >= 0) {
+                this._arrayData.splice(index, 1);
+            }
+        };
+        PerformanceArray.prototype.push = function (item) {
+            this._arrayData.push(item);
+        };
+        PerformanceArray.prototype.pop = function () {
+            return this._arrayData.pop();
+        };
+        PerformanceArray.prototype.unshift = function (item) {
+            this._arrayData.unshift(item);
+        };
+        PerformanceArray.prototype.shift = function () {
+            return this._arrayData.shift();
+        };
+        PerformanceArray.prototype.splice = function (index, deleteCount) {
+            var insertItems = [];
+            for (var _i = 2; _i < arguments.length; _i++) {
+                insertItems[_i - 2] = arguments[_i];
+            }
+            return this._arrayData.splice.apply(this._arrayData, [index, deleteCount].concat(insertItems));
+        };
         PerformanceArray.prototype.toArray = function () {
             return this._arrayData.slice();
         };
+        Object.defineProperty(PerformanceArray.prototype, "length", {
+            get: function () {
+                return this._arrayData.length;
+            },
+            enumerable: true,
+            configurable: true
+        });
         return PerformanceArray;
     }());
     PerformanceArray_1.PerformanceArray = PerformanceArray;
 })(PerformanceArray || (PerformanceArray = {}));
 var expect = require('chai').expect;
-/// <reference path="./PerformanceArray.ts" />
-/// <reference path="./specImports.spec.ts" />
 describe('PerformanceArray', function () {
     var testData;
     var performanceArray;
@@ -56,16 +85,48 @@ describe('PerformanceArray', function () {
         expect(testData[2]).to.be.equal(performanceArray.item(2), 'item at index 2 is the same');
         expect(performanceArray.item(5000), 'item at out of bounds index is undefined').to.be.undefined;
     });
+    it('can push a new item', function () {
+        var item = { id: 100, value: 5482 };
+        performanceArray.push(item);
+        expect(performanceArray.item(performanceArray.length - 1)).to.be.equal(item);
+    });
+    it('can pop an item', function () {
+        var item = performanceArray.item(performanceArray.length - 1);
+        var oldLength = performanceArray.length;
+        var poppedItem = performanceArray.pop();
+        expect(poppedItem).to.be.equal(item);
+        expect(performanceArray.length).to.be.equal(oldLength - 1);
+    });
+    it('can shift an item', function () {
+        var item = performanceArray.item(0);
+        var oldLength = performanceArray.length;
+        var shiftedItem = performanceArray.shift();
+        expect(shiftedItem).to.be.equal(item);
+        expect(performanceArray.length).to.be.equal(oldLength - 1);
+    });
+    it('can unshift a new item', function () {
+        var item = { id: 100, value: 5482 };
+        var oldLength = performanceArray.length;
+        performanceArray.unshift(item);
+        expect(performanceArray.item(0)).to.be.equal(item);
+        expect(performanceArray.length).to.be.equal(oldLength + 1);
+    });
+    it('can splice items', function () {
+        var newItem = { id: 100, value: 5482 };
+        var oldLength = performanceArray.length;
+        var itemThatShouldBeRemoved = performanceArray.item(2);
+        var removedItems = performanceArray.splice(2, 1, newItem);
+        expect(removedItems[0], 'removed the correct item').to.be.equal(itemThatShouldBeRemoved);
+        expect(performanceArray.length).to.be.equal(oldLength);
+        expect(performanceArray.item(2), 'added the new item at the correct index').to.be.equal(newItem);
+    });
 });
 var PerformanceArray;
 (function (PerformanceArray) {
-    var PerformanceArrayOptionsValidator = /** @class */ (function () {
+    var PerformanceArrayOptionsValidator = (function () {
         function PerformanceArrayOptionsValidator(options) {
             this._options = options;
         }
-        /**
-         * return true if the options object is valid, else it will throw an exception with a description
-         */
         PerformanceArrayOptionsValidator.prototype.validate = function () {
             this._validateObject(this._options, PerformanceArrayOptionsValidator._availableKeyInfos);
             return true;
@@ -134,10 +195,7 @@ var PerformanceArray;
     }());
     PerformanceArray.PerformanceArrayOptionsValidator = PerformanceArrayOptionsValidator;
 })(PerformanceArray || (PerformanceArray = {}));
-/// <reference path="./PerformanceArrayOptionsValidator.ts" />
-/// <reference path="./specImports.spec.ts" />
 describe('PerformanceArrayOptionsValidator', function () {
-    var validator;
     it('should allow and empty object', function () {
         var validator = new PerformanceArray.PerformanceArrayOptionsValidator({});
         validator.validate();
@@ -145,8 +203,8 @@ describe('PerformanceArrayOptionsValidator', function () {
     it('should throw an error on an unknown key', function () {
         var error = null;
         try {
-            var validator_1 = new PerformanceArray.PerformanceArrayOptionsValidator({ powderThatMakesYouSayYes: 'yes' });
-            validator_1.validate();
+            var validator = new PerformanceArray.PerformanceArrayOptionsValidator({ powderThatMakesYouSayYes: 'yes' });
+            validator.validate();
         }
         catch (e) {
             error = e;
@@ -156,10 +214,10 @@ describe('PerformanceArrayOptionsValidator', function () {
     it('should throw an error on an invalid index option key', function () {
         var error = null;
         try {
-            var validator_2 = new PerformanceArray.PerformanceArrayOptionsValidator({
+            var validator = new PerformanceArray.PerformanceArrayOptionsValidator({
                 indices: [{ powderThatMakesYouSayYes: 'yes' }]
             });
-            validator_2.validate();
+            validator.validate();
         }
         catch (e) {
             error = e;
@@ -169,12 +227,12 @@ describe('PerformanceArrayOptionsValidator', function () {
     it('should throw an error on an invalid index property name', function () {
         var error = null;
         try {
-            var validator_3 = new PerformanceArray.PerformanceArrayOptionsValidator({
+            var validator = new PerformanceArray.PerformanceArrayOptionsValidator({
                 indices: [{
                         propertyNames: [{}]
                     }]
             });
-            validator_3.validate();
+            validator.validate();
         }
         catch (e) {
             error = e;

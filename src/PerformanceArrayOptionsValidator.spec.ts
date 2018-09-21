@@ -3,8 +3,6 @@
 
 describe('PerformanceArrayOptionsValidator', () => {
 
-  let validator: PerformanceArray.PerformanceArrayOptionsValidator;
-
   it('should allow and empty object', () => {
     const validator = new PerformanceArray.PerformanceArrayOptionsValidator({});
     validator.validate();
