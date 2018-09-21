@@ -1,6 +1,5 @@
 /// <reference path="./PerformanceArray.ts" />
-
-const expect: Chai.ExpectStatic = require('chai').expect;
+/// <reference path="./specImports.spec.ts" />
 
 describe('PerformanceArray', () => {
   let testData: Array<{id: number, value: number}>;

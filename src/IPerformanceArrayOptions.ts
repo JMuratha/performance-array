@@ -1,5 +1,9 @@
 namespace PerformanceArray {
-  export interface IPerformanceArrayOptions {
+  export interface IPerformanceArrayIndexOptions {
+    propertyNames: Array<string>
+  }
 
+  export interface IPerformanceArrayOptions {
+    indices?: Array<IPerformanceArrayIndexOptions>;
   }
 }

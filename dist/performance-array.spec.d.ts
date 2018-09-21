@@ -1,6 +1,10 @@
 /// <reference types="chai" />
 declare namespace PerformanceArray {
+    interface IPerformanceArrayIndexOptions {
+        propertyNames: Array<string>;
+    }
     interface IPerformanceArrayOptions {
+        indices?: Array<IPerformanceArrayIndexOptions>;
     }
 }
 declare namespace PerformanceArray {
@@ -13,3 +17,19 @@ declare namespace PerformanceArray {
     }
 }
 declare const expect: Chai.ExpectStatic;
+declare namespace PerformanceArray {
+    class PerformanceArrayOptionsValidator {
+        private _options;
+        private static _availableKeyInfos;
+        constructor(options: IPerformanceArrayOptions);
+        /**
+         * return true if the options object is valid, else it will throw an exception with a description
+         */
+        validate(): boolean;
+        private _validateObject;
+        private _validateKeyValue;
+        private _validateArraySubType;
+        private _getNameOfClass;
+        private _getAvailableKeyInfoByName;
+    }
+}
