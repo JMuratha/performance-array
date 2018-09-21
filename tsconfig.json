@@ -6,7 +6,11 @@
     "outDir": "./dist",
     "outFile": "./dist/performance-array.js",
     "declaration": true,
-    "noImplicitAny": true
+    "noImplicitAny": true,
+    "noImplicitReturns": true,
+    "removeComments": true,
+    "noUnusedLocals": true,
+    "listEmittedFiles": true
   },
   "files": [
     "./src/PerformanceArray"
