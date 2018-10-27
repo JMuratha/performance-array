@@ -1,9 +1,155 @@
 var PerformanceArray;
+(function (PerformanceArray) {
+    var KeyStorage = (function () {
+        function KeyStorage(options) {
+            this._options = options;
+            this._createIndexNameMap();
+        }
+        KeyStorage.prototype.addItem = function (item) {
+            for (var _i = 0, _a = this._options.indices; _i < _a.length; _i++) {
+                var indexOpts = _a[_i];
+                this._addItemToIndexNameMap(item, indexOpts);
+            }
+        };
+        KeyStorage.prototype.removeItem = function (item) {
+            for (var _i = 0, _a = this._options.indices; _i < _a.length; _i++) {
+                var indexOpts = _a[_i];
+                this._removeItemFromIndexNameMap(item, indexOpts);
+            }
+        };
+        KeyStorage.prototype.queryItemsByIndexOpts = function (query, indexOpts) {
+            var indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
+            if (!indexMap) {
+                throw new Error("[PerformanceArray] index for " + JSON.stringify(indexOpts) + " doesn't exist");
+            }
+            var items = indexMap[this._generateIndexValue(query, indexOpts)];
+            return items ? items : [];
+        };
+        KeyStorage.prototype._createIndexNameMap = function () {
+            var map = {};
+            for (var _i = 0, _a = this._options.indices; _i < _a.length; _i++) {
+                var indexOpts = _a[_i];
+                var indexName = this._generateIndexName(indexOpts);
+                map[indexName] = {};
+            }
+            this._indexNameMap = map;
+        };
+        KeyStorage.prototype._addItemToIndexNameMap = function (item, indexOpts) {
+            var indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
+            var indexValue = this._generateIndexValue(item, indexOpts);
+            var items = indexMap[indexValue];
+            if (!items) {
+                items = indexMap[indexValue] = [];
+            }
+            if (items.indexOf(item) == -1) {
+                items.push(item);
+            }
+        };
+        KeyStorage.prototype._removeItemFromIndexNameMap = function (item, indexOpts) {
+            var indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
+            var indexValue = this._generateIndexValue(item, indexOpts);
+            var items = indexMap[indexValue];
+            if (items) {
+                var index = items.indexOf(item);
+                if (index >= 0) {
+                    items.splice(index, 1);
+                }
+            }
+        };
+        KeyStorage.prototype._generateIndexValue = function (item, indexOpts) {
+            var valueMap = {};
+            for (var _i = 0, _a = indexOpts.propertyNames; _i < _a.length; _i++) {
+                var name = _a[_i];
+                var value = item[name] != null ? item[name] : null;
+                valueMap[name] = value;
+            }
+            var indexValue;
+            try {
+                indexValue = JSON.stringify(valueMap);
+            }
+            catch (e) {
+                throw new Error('[PerformanceArray] Index couldn\'t be serialized!');
+            }
+            return indexValue;
+        };
+        KeyStorage.prototype._generateIndexName = function (indexOpts) {
+            return JSON.stringify(indexOpts.propertyNames);
+        };
+        return KeyStorage;
+    }());
+    PerformanceArray.KeyStorage = KeyStorage;
+})(PerformanceArray || (PerformanceArray = {}));
+var expect = require('chai').expect;
+describe('KeyStorage', function () {
+    var keyStorage;
+    var idIndexOpts = {
+        propertyNames: ['id']
+    };
+    var valueIndexOpts = {
+        propertyNames: ['value']
+    };
+    var nameValueIndexOpts = {
+        propertyNames: ['name', 'value']
+    };
+    var items = [
+        {
+            id: 10,
+            name: 'franz',
+            value: 10
+        },
+        {
+            id: 20,
+            name: 'franz',
+            value: 10
+        },
+        {
+            id: 30,
+            name: 'klaus',
+            value: 10
+        },
+        {
+            id: 40,
+            name: 'marta',
+            value: undefined
+        },
+        {
+            id: 50,
+            name: 'lisa',
+            value: null
+        }
+    ];
+    beforeEach(function () {
+        keyStorage = new PerformanceArray.KeyStorage({
+            indices: [idIndexOpts, nameValueIndexOpts, valueIndexOpts]
+        });
+        for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
+            var item = items_1[_i];
+            keyStorage.addItem(item);
+        }
+    });
+    it('should find an item by the id', function () {
+        expect(keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)[0]).to.be.equal(items[0]);
+    });
+    it('should handle null and undefined in the same way', function () {
+        var result = keyStorage.queryItemsByIndexOpts({ value: null }, valueIndexOpts);
+        expect(result, 'to find marta and lisa').to.deep.equal([items[3], items[4]]);
+    });
+    it('should find items with an combined index', function () {
+        var result = keyStorage.queryItemsByIndexOpts({ name: 'franz', value: 10 }, nameValueIndexOpts);
+        expect(result, 'to find franz (id 10) and franz (id 20)').to.deep.equal([items[0], items[1]]);
+    });
+    it('should be able to remove items', function () {
+        keyStorage.removeItem(items[0]);
+        expect(keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)).to.be.empty;
+        expect(keyStorage.queryItemsByIndexOpts({ name: 'franz', value: 10 }, nameValueIndexOpts)).to.have.lengthOf(1);
+        expect(keyStorage.queryItemsByIndexOpts({ value: 10 }, valueIndexOpts)).to.have.lengthOf(2);
+    });
+});
+var PerformanceArray;
 (function (PerformanceArray_1) {
     var PerformanceArray = (function () {
         function PerformanceArray(arrayData, options) {
             this._arrayData = arrayData;
-            this._options = options ? options : {};
         }
         PerformanceArray.prototype.item = function (i) {
             return this._arrayData[i];
@@ -47,7 +193,6 @@ var PerformanceArray;
     }());
     PerformanceArray_1.PerformanceArray = PerformanceArray;
 })(PerformanceArray || (PerformanceArray = {}));
-var expect = require('chai').expect;
 describe('PerformanceArray', function () {
     var testData;
     var performanceArray;

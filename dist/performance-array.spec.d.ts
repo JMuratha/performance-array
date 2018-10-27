@@ -8,9 +8,26 @@ declare namespace PerformanceArray {
     }
 }
 declare namespace PerformanceArray {
+    class KeyStorage {
+        private _options;
+        private _indexNameMap;
+        constructor(options: IPerformanceArrayOptions);
+        addItem(item: any): void;
+        removeItem(item: any): void;
+        queryItemsByIndexOpts(query: {
+            [s: string]: any;
+        }, indexOpts: IPerformanceArrayIndexOptions): Array<any>;
+        private _createIndexNameMap;
+        private _addItemToIndexNameMap;
+        private _removeItemFromIndexNameMap;
+        private _generateIndexValue;
+        private _generateIndexName;
+    }
+}
+declare const expect: Chai.ExpectStatic;
+declare namespace PerformanceArray {
     class PerformanceArray<T> {
         private _arrayData;
-        private _options;
         constructor(arrayData: Array<T>, options?: IPerformanceArrayOptions);
         item(i: number): T;
         remove(item: T): void;
@@ -23,7 +40,6 @@ declare namespace PerformanceArray {
         readonly length: number;
     }
 }
-declare const expect: Chai.ExpectStatic;
 declare namespace PerformanceArray {
     class PerformanceArrayOptionsValidator {
         private _options;
