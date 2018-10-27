@@ -5,11 +5,9 @@ namespace PerformanceArray {
   export class PerformanceArray<T> {
 
     private _arrayData: Array<T>;
-    private _options: IPerformanceArrayOptions;
 
-    constructor(arrayData: Array<T>, options?: IPerformanceArrayOptions) {
+    constructor(arrayData: Array<T>) {
       this._arrayData = arrayData;
-      this._options = options ? options : {};
     }
 
     item(i: number): T {

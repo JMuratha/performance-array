@@ -1,3 +1,6 @@
+/// <reference path="./IPerformanceArrayOptions.ts" />
+
+
 namespace PerformanceArray {
   interface IAvailableKeyInfo {
     name: string,
