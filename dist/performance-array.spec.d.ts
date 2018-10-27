@@ -14,11 +14,13 @@ declare namespace PerformanceArray {
         constructor(options: IPerformanceArrayOptions);
         addItem(item: any): void;
         removeItem(item: any): void;
+        updateItem(item: any): void;
         queryItemsByIndexOpts(query: {
             [s: string]: any;
         }, indexOpts: IPerformanceArrayIndexOptions): Array<any>;
         private _createIndexNameMap;
         private _addItemToIndexNameMap;
+        private _removeItemFromIndexNameMapByValue;
         private _removeItemFromIndexNameMap;
         private _generateIndexValue;
         private _generateIndexName;
@@ -28,7 +30,7 @@ declare const expect: Chai.ExpectStatic;
 declare namespace PerformanceArray {
     class PerformanceArray<T> {
         private _arrayData;
-        constructor(arrayData: Array<T>, options?: IPerformanceArrayOptions);
+        constructor(arrayData: Array<T>);
         item(i: number): T;
         remove(item: T): void;
         push(item: T): void;

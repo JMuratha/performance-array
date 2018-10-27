@@ -14,7 +14,17 @@ var PerformanceArray;
         KeyStorage.prototype.removeItem = function (item) {
             for (var _i = 0, _a = this._options.indices; _i < _a.length; _i++) {
                 var indexOpts = _a[_i];
-                this._removeItemFromIndexNameMap(item, indexOpts);
+                this._removeItemFromIndexNameMapByValue(item, indexOpts);
+            }
+        };
+        KeyStorage.prototype.updateItem = function (item) {
+            for (var _i = 0, _a = this._options.indices; _i < _a.length; _i++) {
+                var indexOpts = _a[_i];
+                var items = this.queryItemsByIndexOpts(item, indexOpts);
+                if (items.indexOf(item) === -1) {
+                    this._removeItemFromIndexNameMap(item, indexOpts);
+                    this._addItemToIndexNameMap(item, indexOpts);
+                }
             }
         };
         KeyStorage.prototype.queryItemsByIndexOpts = function (query, indexOpts) {
@@ -41,15 +51,28 @@ var PerformanceArray;
             if (!items) {
                 items = indexMap[indexValue] = [];
             }
-            if (items.indexOf(item) == -1) {
+            if (items.indexOf(item) === -1) {
                 items.push(item);
             }
         };
-        KeyStorage.prototype._removeItemFromIndexNameMap = function (item, indexOpts) {
+        KeyStorage.prototype._removeItemFromIndexNameMapByValue = function (item, indexOpts) {
             var indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
             var indexValue = this._generateIndexValue(item, indexOpts);
             var items = indexMap[indexValue];
             if (items) {
+                var index = items.indexOf(item);
+                if (index >= 0) {
+                    items.splice(index, 1);
+                }
+            }
+        };
+        KeyStorage.prototype._removeItemFromIndexNameMap = function (item, indexOpts) {
+            var indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
+            for (var key in indexMap) {
+                if (!indexMap.hasOwnProperty(key)) {
+                    continue;
+                }
+                var items = indexMap[key];
                 var index = items.indexOf(item);
                 if (index >= 0) {
                     items.splice(index, 1);
@@ -91,34 +114,35 @@ describe('KeyStorage', function () {
     var nameValueIndexOpts = {
         propertyNames: ['name', 'value']
     };
-    var items = [
-        {
-            id: 10,
-            name: 'franz',
-            value: 10
-        },
-        {
-            id: 20,
-            name: 'franz',
-            value: 10
-        },
-        {
-            id: 30,
-            name: 'klaus',
-            value: 10
-        },
-        {
-            id: 40,
-            name: 'marta',
-            value: undefined
-        },
-        {
-            id: 50,
-            name: 'lisa',
-            value: null
-        }
-    ];
+    var items;
     beforeEach(function () {
+        items = [
+            {
+                id: 10,
+                name: 'franz',
+                value: 10
+            },
+            {
+                id: 20,
+                name: 'franz',
+                value: 10
+            },
+            {
+                id: 30,
+                name: 'klaus',
+                value: 10
+            },
+            {
+                id: 40,
+                name: 'marta',
+                value: undefined
+            },
+            {
+                id: 50,
+                name: 'lisa',
+                value: null
+            }
+        ];
         keyStorage = new PerformanceArray.KeyStorage({
             indices: [idIndexOpts, nameValueIndexOpts, valueIndexOpts]
         });
@@ -144,11 +168,18 @@ describe('KeyStorage', function () {
         expect(keyStorage.queryItemsByIndexOpts({ name: 'franz', value: 10 }, nameValueIndexOpts)).to.have.lengthOf(1);
         expect(keyStorage.queryItemsByIndexOpts({ value: 10 }, valueIndexOpts)).to.have.lengthOf(2);
     });
+    it('should move updated item to the correct index', function () {
+        items[0].id = 11;
+        expect(keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)[0], 'to find item in old index before updating').to.be.equal(items[0]);
+        keyStorage.updateItem(items[0]);
+        expect(keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)[0], 'to not find item in old index after updating').to.be.undefined;
+        expect(keyStorage.queryItemsByIndexOpts({ id: 11 }, idIndexOpts)[0], 'to find item in new index after updating').to.be.equal(items[0]);
+    });
 });
 var PerformanceArray;
 (function (PerformanceArray_1) {
     var PerformanceArray = (function () {
-        function PerformanceArray(arrayData, options) {
+        function PerformanceArray(arrayData) {
             this._arrayData = arrayData;
         }
         PerformanceArray.prototype.item = function (i) {
