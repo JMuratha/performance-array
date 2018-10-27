@@ -1,3 +1,4 @@
+/// <reference path="./TQuery.ts" />
 /// <reference path="./IPerformanceArrayOptions.ts" />
 
 
@@ -42,10 +43,10 @@ namespace PerformanceArray {
 
     /**
      * 
-     * @param query - a map of property name to its queried value, also all propertyNames of the indexOpts have to be present in the query!
+     * @param query - all propertyNames of the indexOpts have to be present in the query!
      * @param indexOpts 
      */
-    public queryItemsByIndexOpts(query: { [s: string]: any }, indexOpts: IPerformanceArrayIndexOptions): Array<any> {
+    public queryItemsByIndexOpts(query: TQuery, indexOpts: IPerformanceArrayIndexOptions): Array<any> {
       const indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
       if (!indexMap) {
         throw new Error(`[PerformanceArray] index for ${JSON.stringify(indexOpts)} doesn't exist`);
