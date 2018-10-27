@@ -1,5 +1,71 @@
 var PerformanceArray;
 (function (PerformanceArray) {
+    var IndexFinder = (function () {
+        function IndexFinder(options) {
+            this._options = options;
+        }
+        IndexFinder.prototype.findIndexOptionsForQuery = function (query) {
+            var propertyNames = Object.keys(query);
+            var currentMatchCount = 0;
+            var options = null;
+            for (var _i = 0, _a = this._options.indices; _i < _a.length; _i++) {
+                var indexOpts = _a[_i];
+                var matchCount = this._findMatchCount(propertyNames, indexOpts.propertyNames);
+                if (matchCount > currentMatchCount) {
+                    currentMatchCount = matchCount;
+                    options = indexOpts;
+                }
+            }
+            return options;
+        };
+        IndexFinder.prototype._findMatchCount = function (queryPropertyNames, indexPropertyNames) {
+            if (queryPropertyNames.length < indexPropertyNames.length) {
+                return 0;
+            }
+            for (var _i = 0, indexPropertyNames_1 = indexPropertyNames; _i < indexPropertyNames_1.length; _i++) {
+                var indexPropertyName = indexPropertyNames_1[_i];
+                if (queryPropertyNames.indexOf(indexPropertyName) === -1) {
+                    return 0;
+                }
+            }
+            return indexPropertyNames.length;
+        };
+        return IndexFinder;
+    }());
+    PerformanceArray.IndexFinder = IndexFinder;
+})(PerformanceArray || (PerformanceArray = {}));
+var expect = require('chai').expect;
+describe('IndexFinder', function () {
+    var indexFinder;
+    var idIndexOpts = {
+        propertyNames: ['id']
+    };
+    var valueIndexOpts = {
+        propertyNames: ['value']
+    };
+    var nameValueIndexOpts = {
+        propertyNames: ['name', 'value']
+    };
+    beforeEach(function () {
+        indexFinder = new PerformanceArray.IndexFinder({
+            indices: [idIndexOpts, nameValueIndexOpts, valueIndexOpts]
+        });
+    });
+    it('should find the id index', function () {
+        expect(indexFinder.findIndexOptionsForQuery({ id: 10 })).to.be.equal(idIndexOpts);
+    });
+    it('should find the nameValue index', function () {
+        expect(indexFinder.findIndexOptionsForQuery({ name: 'franz', value: null })).to.be.equal(nameValueIndexOpts);
+    });
+    it('should find the value index', function () {
+        expect(indexFinder.findIndexOptionsForQuery({ value: null, someProperty: '20' })).to.be.equal(valueIndexOpts);
+    });
+    it('should find no index', function () {
+        expect(indexFinder.findIndexOptionsForQuery({ someProperty: '20' })).to.be.null;
+    });
+});
+var PerformanceArray;
+(function (PerformanceArray) {
     var KeyStorage = (function () {
         function KeyStorage(options) {
             this._options = options;
@@ -102,7 +168,6 @@ var PerformanceArray;
     }());
     PerformanceArray.KeyStorage = KeyStorage;
 })(PerformanceArray || (PerformanceArray = {}));
-var expect = require('chai').expect;
 describe('KeyStorage', function () {
     var keyStorage;
     var idIndexOpts = {

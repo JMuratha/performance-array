@@ -1,5 +1,10 @@
 /// <reference types="chai" />
 declare namespace PerformanceArray {
+    type TQuery = {
+        [s: string]: any;
+    };
+}
+declare namespace PerformanceArray {
     interface IPerformanceArrayIndexOptions {
         propertyNames: Array<string>;
     }
@@ -8,6 +13,15 @@ declare namespace PerformanceArray {
     }
 }
 declare namespace PerformanceArray {
+    class IndexFinder {
+        private _options;
+        constructor(options: IPerformanceArrayOptions);
+        findIndexOptionsForQuery(query: TQuery): IPerformanceArrayIndexOptions | null;
+        private _findMatchCount;
+    }
+}
+declare const expect: Chai.ExpectStatic;
+declare namespace PerformanceArray {
     class KeyStorage {
         private _options;
         private _indexNameMap;
@@ -15,9 +29,7 @@ declare namespace PerformanceArray {
         addItem(item: any): void;
         removeItem(item: any): void;
         updateItem(item: any): void;
-        queryItemsByIndexOpts(query: {
-            [s: string]: any;
-        }, indexOpts: IPerformanceArrayIndexOptions): Array<any>;
+        queryItemsByIndexOpts(query: TQuery, indexOpts: IPerformanceArrayIndexOptions): Array<any>;
         private _createIndexNameMap;
         private _addItemToIndexNameMap;
         private _removeItemFromIndexNameMapByValue;
@@ -26,7 +38,6 @@ declare namespace PerformanceArray {
         private _generateIndexName;
     }
 }
-declare const expect: Chai.ExpectStatic;
 declare namespace PerformanceArray {
     class PerformanceArray<T> {
         private _arrayData;
