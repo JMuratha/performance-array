@@ -13,7 +13,7 @@
     "listEmittedFiles": true
   },
   "files": [
-    "./src/PerformanceArray"
+    "./src/PerformanceArray.ts"
   ],
   "exclude": [
     "./dist/**/*"
