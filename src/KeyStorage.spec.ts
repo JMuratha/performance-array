@@ -77,9 +77,14 @@ describe('KeyStorage', () => {
 
   it('should move updated item to the correct index', () => {
     items[0].id = 11;
-    expect(keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)[0], 'to find item in old index before updating').to.be.equal(items[0]);
+
+    const oldIndexItem = keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)[0];
+    expect(oldIndexItem, 'to find item in old index before updating').to.be.equal(items[0]);
     keyStorage.updateItem(items[0]);
-    expect(keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)[0], 'to not find item in old index after updating').to.be.undefined;
-    expect(keyStorage.queryItemsByIndexOpts({ id: 11 }, idIndexOpts)[0], 'to find item in new index after updating').to.be.equal(items[0]);
+
+    const oldIndexNewItem = keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)[0];
+    expect(oldIndexNewItem, 'to not find item in old index after updating').to.be.undefined;
+    const newIndexItem = keyStorage.queryItemsByIndexOpts({ id: 11 }, idIndexOpts)[0];
+    expect(newIndexItem, 'to find item in new index after updating').to.be.equal(items[0]);
   });
 });

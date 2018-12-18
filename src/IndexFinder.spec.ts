@@ -29,7 +29,7 @@ describe('IndexFinder', () => {
   });
 
   it('should find the value index', () => {
-    expect(indexFinder.findIndexOptionsForQuery({ value: null, someProperty: '20' })).to.be.equal(valueIndexOpts)
+    expect(indexFinder.findIndexOptionsForQuery({ value: null, someProperty: '20' })).to.be.equal(valueIndexOpts);
   });
 
   it('should find no index', () => {

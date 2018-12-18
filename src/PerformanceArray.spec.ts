@@ -85,5 +85,5 @@ describe('PerformanceArray', () => {
     expect(removedItems[0], 'removed the correct item').to.be.equal(itemThatShouldBeRemoved);
     expect(performanceArray.length).to.be.equal(oldLength);
     expect(performanceArray.item(2), 'added the new item at the correct index').to.be.equal(newItem);
-  })
+  });
 });

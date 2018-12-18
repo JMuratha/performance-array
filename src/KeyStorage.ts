@@ -69,9 +69,9 @@ namespace PerformanceArray {
 
     private _addItemToIndexNameMap(item: any, indexOpts: IPerformanceArrayIndexOptions) {
       const indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
-      const indexValue = this._generateIndexValue(item, indexOpts)
+      const indexValue = this._generateIndexValue(item, indexOpts);
 
-      let items = indexMap[indexValue]
+      let items = indexMap[indexValue];
       if (!items) {
         items = indexMap[indexValue] = [];
       }
@@ -90,7 +90,7 @@ namespace PerformanceArray {
      */
     private _removeItemFromIndexNameMapByValue(item: any, indexOpts: IPerformanceArrayIndexOptions) {
       const indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
-      const indexValue = this._generateIndexValue(item, indexOpts)
+      const indexValue = this._generateIndexValue(item, indexOpts);
 
       let items = indexMap[indexValue];
 
@@ -138,7 +138,7 @@ namespace PerformanceArray {
       try {
         indexValue = JSON.stringify(valueMap);
       } catch (e) {
-        throw new Error('[PerformanceArray] Index couldn\'t be serialized!')
+        throw new Error('[PerformanceArray] Index couldn\'t be serialized!');
       }
 
       return indexValue;

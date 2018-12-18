@@ -4,6 +4,7 @@
   "description": "A solution to have more perfomant access to your Array data by using indices.",
   "main": "index.js",
   "scripts": {
+    "tslint": "npx tslint ./src/**/*.ts",
     "test": "npx tsc -p tsconfig.spec.json && npx mocha ./dist/performance-array.spec.js",
     "build": "npx tsc",
     "build-watch": "npx tsc --watch"
@@ -29,6 +30,7 @@
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.10.1",
     "chai": "^4.2.0",
+    "tslint": "^5.12.0",
     "typescript": "^3.2.0"
   }
 }

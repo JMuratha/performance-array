@@ -12,7 +12,9 @@ describe('PerformanceArrayOptionsValidator', () => {
     let error: Error = null;
 
     try {
-      const validator = new PerformanceArray.PerformanceArrayOptionsValidator((<any>{ powderThatMakesYouSayYes: 'yes' }));
+      const validator = new PerformanceArray.PerformanceArrayOptionsValidator(
+        (<any>{ powderThatMakesYouSayYes: 'yes' })
+      );
       validator.validate();
     } catch (e) {
       error = e;

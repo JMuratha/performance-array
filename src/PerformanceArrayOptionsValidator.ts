@@ -3,10 +3,10 @@
 
 namespace PerformanceArray {
   interface IAvailableKeyInfo {
-    name: string,
-    type: any,
-    subType?: any, //for arrays which don't need further validation than the type
-    subKeyInfos?: Array<IAvailableKeyInfo> //only works on objects/array of objects
+    name: string;
+    type: any;
+    subType?: any; //for arrays which don't need further validation than the type
+    subKeyInfos?: Array<IAvailableKeyInfo>; //only works on objects/array of objects
   }
 
   export class PerformanceArrayOptionsValidator {
@@ -50,6 +50,7 @@ namespace PerformanceArray {
       }
     }
 
+    // tslint:disable-next-line:max-line-length
     private _validateKeyValue(key: string, value: any, availableKeyInfos: Array<IAvailableKeyInfo>, optionPath: string) {
       const info = this._getAvailableKeyInfoByName(key, availableKeyInfos);
       if (!info) {
@@ -58,7 +59,8 @@ namespace PerformanceArray {
 
       if (value.constructor !== info.type) {
         throw new Error(
-          `[PerformanceArray] expected type ${this._getNameOfClass(info.type)} but got type ${this._getNameOfClass(value.constructor)} instead for ${key}`
+          `[PerformanceArray] expected type ${this._getNameOfClass(info.type)}`
+          + ` but got type ${this._getNameOfClass(value.constructor)} instead for ${key}`
         );
       }
 
@@ -68,7 +70,9 @@ namespace PerformanceArray {
 
       if (info.subKeyInfos) {
         if (value.constructor === Array) {
-          value.forEach((item: any, index: number) => this._validateObject(item, info.subKeyInfos, optionPath + '.' + index));
+          value.forEach((item: any, index: number) => {
+            return this._validateObject(item, info.subKeyInfos, optionPath + '.' + index);
+          });
         } else {
           this._validateObject(value, info.subKeyInfos, optionPath);
         }
@@ -79,11 +83,12 @@ namespace PerformanceArray {
       array.forEach((item, index) => {
         if (item.constructor !== itemType) {
           throw new Error(
-            `[PerformanceArray] expected type ${this._getNameOfClass(item.constructor)} but got type ${this._getNameOfClass(item.constructor)} instead for `
+            `[PerformanceArray] expected type ${this._getNameOfClass(item.constructor)}`
+            + ` but got type ${this._getNameOfClass(item.constructor)} instead for `
             + optionsPath + '.' + index
-          )
+          );
         }
-      })
+      });
     }
 
     private _getNameOfClass(cl: any): string | null {
@@ -92,7 +97,7 @@ namespace PerformanceArray {
     }
 
     private _getAvailableKeyInfoByName(name: string, availableKeyInfos: Array<IAvailableKeyInfo>): IAvailableKeyInfo {
-      return availableKeyInfos.find((info) => info.name === name)
+      return availableKeyInfos.find((info) => info.name === name);
     }
   }
 }
