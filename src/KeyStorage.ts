@@ -1,5 +1,6 @@
 /// <reference path="./TQuery.ts" />
 /// <reference path="./IPerformanceArrayOptions.ts" />
+/// <reference path="./Utils.ts" />
 
 
 namespace PerformanceArray {
@@ -129,8 +130,7 @@ namespace PerformanceArray {
       const valueMap: { [s: string]: any } = {};
 
       for (const name of indexOpts.propertyNames) {
-        const value = item[name] != null ? item[name] : null;
-        valueMap[name] = value;
+        valueMap[name] = Utils.normalizeUndefined(item[name]);
       }
 
       let indexValue: string;
