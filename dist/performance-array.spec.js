@@ -35,35 +35,6 @@ var PerformanceArray;
     PerformanceArray.IndexFinder = IndexFinder;
 })(PerformanceArray || (PerformanceArray = {}));
 var expect = require('chai').expect;
-describe('IndexFinder', function () {
-    var indexFinder;
-    var idIndexOpts = {
-        propertyNames: ['id']
-    };
-    var valueIndexOpts = {
-        propertyNames: ['value']
-    };
-    var nameValueIndexOpts = {
-        propertyNames: ['name', 'value']
-    };
-    beforeEach(function () {
-        indexFinder = new PerformanceArray.IndexFinder({
-            indices: [idIndexOpts, nameValueIndexOpts, valueIndexOpts]
-        });
-    });
-    it('should find the id index', function () {
-        expect(indexFinder.findIndexOptionsForQuery({ id: 10 })).to.be.equal(idIndexOpts);
-    });
-    it('should find the nameValue index', function () {
-        expect(indexFinder.findIndexOptionsForQuery({ name: 'franz', value: null })).to.be.equal(nameValueIndexOpts);
-    });
-    it('should find the value index', function () {
-        expect(indexFinder.findIndexOptionsForQuery({ value: null, someProperty: '20' })).to.be.equal(valueIndexOpts);
-    });
-    it('should find no index', function () {
-        expect(indexFinder.findIndexOptionsForQuery({ someProperty: '20' })).to.be.null;
-    });
-});
 var PerformanceArray;
 (function (PerformanceArray) {
     var Utils = (function () {
@@ -258,6 +229,28 @@ var SpecTestData = (function () {
     };
     return SpecTestData;
 }());
+describe('IndexFinder', function () {
+    var indexFinder;
+    beforeEach(function () {
+        indexFinder = new PerformanceArray.IndexFinder(SpecTestData.generatePerformanceArrayOptions());
+    });
+    it('should find the id index', function () {
+        var indexOptions = indexFinder.findIndexOptionsForQuery({ id: 10 });
+        expect(indexOptions).to.be.equal(SpecTestData.idIndexOpts);
+    });
+    it('should find the nameValue index', function () {
+        var indexOptions = indexFinder.findIndexOptionsForQuery({ name: 'franz', value: null });
+        expect(indexOptions).to.be.equal(SpecTestData.nameValueIndexOpts);
+    });
+    it('should find the value index', function () {
+        var indexOptions = indexFinder.findIndexOptionsForQuery({ value: null, someProperty: '20' });
+        expect(indexOptions).to.be.equal(SpecTestData.valueIndexOpts);
+    });
+    it('should find no index', function () {
+        var indexOptions = indexFinder.findIndexOptionsForQuery({ someProperty: '20' });
+        expect(indexOptions).to.be.null;
+    });
+});
 describe('KeyStorage', function () {
     var keyStorage;
     beforeEach(function () {
