@@ -66,6 +66,18 @@ describe('IndexFinder', function () {
 });
 var PerformanceArray;
 (function (PerformanceArray) {
+    var Utils = (function () {
+        function Utils() {
+        }
+        Utils.normalizeUndefined = function (value) {
+            return value != null ? value : null;
+        };
+        return Utils;
+    }());
+    PerformanceArray.Utils = Utils;
+})(PerformanceArray || (PerformanceArray = {}));
+var PerformanceArray;
+(function (PerformanceArray) {
     var KeyStorage = (function () {
         function KeyStorage(options) {
             this._options = options;
@@ -149,8 +161,7 @@ var PerformanceArray;
             var valueMap = {};
             for (var _i = 0, _a = indexOpts.propertyNames; _i < _a.length; _i++) {
                 var name = _a[_i];
-                var value = item[name] != null ? item[name] : null;
-                valueMap[name] = value;
+                valueMap[name] = PerformanceArray.Utils.normalizeUndefined(item[name]);
             }
             var indexValue;
             try {
@@ -168,77 +179,120 @@ var PerformanceArray;
     }());
     PerformanceArray.KeyStorage = KeyStorage;
 })(PerformanceArray || (PerformanceArray = {}));
-describe('KeyStorage', function () {
-    var keyStorage;
-    var idIndexOpts = {
+var SpecTestData = (function () {
+    function SpecTestData() {
+    }
+    SpecTestData.fillKeyStorageWithUsers = function (keyStorage) {
+        this.generateUserList().forEach(function (u) { return keyStorage.addItem(u); });
+    };
+    SpecTestData.generateUserList = function () {
+        return [
+            this.frank,
+            this.clara,
+            this.martin,
+            this.max,
+            this.dara,
+            this.stranger,
+            this.karl
+        ];
+    };
+    SpecTestData.generatePerformanceArrayOptions = function () {
+        return {
+            indices: [
+                this.idIndexOpts,
+                this.valueIndexOpts,
+                this.nameValueIndexOpts
+            ]
+        };
+    };
+    SpecTestData.frank = {
+        id: 10,
+        name: 'frank',
+        value: 5,
+        unindexedProperty: 'frank is cool'
+    };
+    SpecTestData.clara = {
+        id: 20,
+        name: 'clara',
+        value: 50,
+        unindexedProperty: 'a cool text'
+    };
+    SpecTestData.martin = {
+        id: 30,
+        name: 'martin',
+        value: 15,
+        unindexedProperty: 'likes cars'
+    };
+    SpecTestData.max = {
+        id: 40,
+        name: 'max',
+        value: 150,
+        unindexedProperty: 'likes houses'
+    };
+    SpecTestData.dara = {
+        id: 50,
+        name: 'dara',
+        value: 50,
+        unindexedProperty: 'is a pilot'
+    };
+    SpecTestData.karl = {
+        id: 60,
+        name: 'karl',
+        value: null,
+        unindexedProperty: 'likes null'
+    };
+    SpecTestData.stranger = {
+        id: 70,
+        name: 'stranger',
+        value: undefined,
+        unindexedProperty: 'likes undefined'
+    };
+    SpecTestData.idIndexOpts = {
         propertyNames: ['id']
     };
-    var valueIndexOpts = {
+    SpecTestData.valueIndexOpts = {
         propertyNames: ['value']
     };
-    var nameValueIndexOpts = {
+    SpecTestData.nameValueIndexOpts = {
         propertyNames: ['name', 'value']
     };
-    var items;
+    return SpecTestData;
+}());
+describe('KeyStorage', function () {
+    var keyStorage;
     beforeEach(function () {
-        items = [
-            {
-                id: 10,
-                name: 'franz',
-                value: 10
-            },
-            {
-                id: 20,
-                name: 'franz',
-                value: 10
-            },
-            {
-                id: 30,
-                name: 'klaus',
-                value: 10
-            },
-            {
-                id: 40,
-                name: 'marta',
-                value: undefined
-            },
-            {
-                id: 50,
-                name: 'lisa',
-                value: null
-            }
-        ];
-        keyStorage = new PerformanceArray.KeyStorage({
-            indices: [idIndexOpts, nameValueIndexOpts, valueIndexOpts]
-        });
-        for (var _i = 0, items_1 = items; _i < items_1.length; _i++) {
-            var item = items_1[_i];
-            keyStorage.addItem(item);
-        }
+        keyStorage = new PerformanceArray.KeyStorage(SpecTestData.generatePerformanceArrayOptions());
+        SpecTestData.fillKeyStorageWithUsers(keyStorage);
     });
     it('should find an item by the id', function () {
-        expect(keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)[0]).to.be.equal(items[0]);
+        var result = keyStorage.queryItemsByIndexOpts({ id: SpecTestData.frank.id }, SpecTestData.idIndexOpts);
+        expect(result[0]).to.be.equal(SpecTestData.frank);
     });
     it('should handle null and undefined in the same way', function () {
-        var result = keyStorage.queryItemsByIndexOpts({ value: null }, valueIndexOpts);
-        expect(result, 'to find marta and lisa').to.deep.equal([items[3], items[4]]);
+        var result = keyStorage.queryItemsByIndexOpts({ value: null }, SpecTestData.valueIndexOpts);
+        expect(result).to.have.length(2, 'to find 2 items');
+        expect(result).to.contain(SpecTestData.stranger, 'to find stranger');
+        expect(result).to.contain(SpecTestData.karl, 'to find karl');
     });
     it('should find items with an combined index', function () {
-        var result = keyStorage.queryItemsByIndexOpts({ name: 'franz', value: 10 }, nameValueIndexOpts);
-        expect(result, 'to find franz (id 10) and franz (id 20)').to.deep.equal([items[0], items[1]]);
+        var query = { name: SpecTestData.max.name, value: SpecTestData.max.value };
+        var result = keyStorage.queryItemsByIndexOpts(query, SpecTestData.nameValueIndexOpts);
+        expect(result, 'to find max').to.deep.equal([SpecTestData.max]);
     });
     it('should be able to remove items', function () {
-        keyStorage.removeItem(items[0]);
-        expect(keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)).to.be.empty;
-        expect(keyStorage.queryItemsByIndexOpts({ name: 'franz', value: 10 }, nameValueIndexOpts)).to.have.lengthOf(1);
-        expect(keyStorage.queryItemsByIndexOpts({ value: 10 }, valueIndexOpts)).to.have.lengthOf(2);
+        keyStorage.removeItem(SpecTestData.clara);
+        expect(keyStorage.queryItemsByIndexOpts({ id: SpecTestData.clara.id }, SpecTestData.idIndexOpts)).to.be.empty;
     });
     it('should move updated item to the correct index', function () {
-        items[0].id = 11;
-        expect(keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)[0], 'to find item in old index before updating').to.be.equal(items[0]);
-        keyStorage.updateItem(items[0]);
-        expect(keyStorage.queryItemsByIndexOpts({ id: 10 }, idIndexOpts)[0], 'to not find item in old index after updating').to.be.undefined;
-        expect(keyStorage.queryItemsByIndexOpts({ id: 11 }, idIndexOpts)[0], 'to find item in new index after updating').to.be.equal(items[0]);
+        var oldId = SpecTestData.dara.id;
+        var newId = ++SpecTestData.dara.id;
+        var oldIndexItem = keyStorage.queryItemsByIndexOpts({ id: oldId }, SpecTestData.idIndexOpts)[0];
+        expect(oldIndexItem, 'to find item in old index before updating').to.be.equal(SpecTestData.dara);
+        keyStorage.updateItem(SpecTestData.dara);
+        var oldIndexNewItem = keyStorage.queryItemsByIndexOpts({ id: oldId }, SpecTestData.idIndexOpts)[0];
+        expect(oldIndexNewItem, 'to not find item in old index after updating').to.be.undefined;
+        var newIndexItem = keyStorage.queryItemsByIndexOpts({ id: newId }, SpecTestData.idIndexOpts)[0];
+        expect(newIndexItem, 'to find item in new index after updating').to.be.equal(SpecTestData.dara);
     });
 });
 var PerformanceArray;
@@ -389,14 +443,17 @@ var PerformanceArray;
                 throw new Error("[PerformanceArray] invalid option " + key);
             }
             if (value.constructor !== info.type) {
-                throw new Error("[PerformanceArray] expected type " + this._getNameOfClass(info.type) + " but got type " + this._getNameOfClass(value.constructor) + " instead for " + key);
+                throw new Error("[PerformanceArray] expected type " + this._getNameOfClass(info.type)
+                    + (" but got type " + this._getNameOfClass(value.constructor) + " instead for " + key));
             }
             if (value.constructor === Array && info.subType) {
                 this._validateArraySubType(value, info.subType, optionPath);
             }
             if (info.subKeyInfos) {
                 if (value.constructor === Array) {
-                    value.forEach(function (item, index) { return _this._validateObject(item, info.subKeyInfos, optionPath + '.' + index); });
+                    value.forEach(function (item, index) {
+                        return _this._validateObject(item, info.subKeyInfos, optionPath + '.' + index);
+                    });
                 }
                 else {
                     this._validateObject(value, info.subKeyInfos, optionPath);
@@ -407,7 +464,8 @@ var PerformanceArray;
             var _this = this;
             array.forEach(function (item, index) {
                 if (item.constructor !== itemType) {
-                    throw new Error("[PerformanceArray] expected type " + _this._getNameOfClass(item.constructor) + " but got type " + _this._getNameOfClass(item.constructor) + " instead for "
+                    throw new Error("[PerformanceArray] expected type " + _this._getNameOfClass(item.constructor)
+                        + (" but got type " + _this._getNameOfClass(item.constructor) + " instead for ")
                         + optionsPath + '.' + index);
                 }
             });

@@ -22,6 +22,11 @@ declare namespace PerformanceArray {
 }
 declare const expect: Chai.ExpectStatic;
 declare namespace PerformanceArray {
+    class Utils {
+        static normalizeUndefined(value: any): any;
+    }
+}
+declare namespace PerformanceArray {
     class KeyStorage {
         private _options;
         private _indexNameMap;
@@ -37,6 +42,27 @@ declare namespace PerformanceArray {
         private _generateIndexValue;
         private _generateIndexName;
     }
+}
+declare type TSpecTestDataUser = {
+    id: number;
+    name: string;
+    value: number | null;
+    unindexedProperty: string;
+};
+declare class SpecTestData {
+    static frank: TSpecTestDataUser;
+    static clara: TSpecTestDataUser;
+    static martin: TSpecTestDataUser;
+    static max: TSpecTestDataUser;
+    static dara: TSpecTestDataUser;
+    static karl: TSpecTestDataUser;
+    static stranger: TSpecTestDataUser;
+    static idIndexOpts: PerformanceArray.IPerformanceArrayIndexOptions;
+    static valueIndexOpts: PerformanceArray.IPerformanceArrayIndexOptions;
+    static nameValueIndexOpts: PerformanceArray.IPerformanceArrayIndexOptions;
+    static fillKeyStorageWithUsers(keyStorage: PerformanceArray.KeyStorage): void;
+    static generateUserList(): Array<TSpecTestDataUser>;
+    static generatePerformanceArrayOptions(): PerformanceArray.IPerformanceArrayOptions;
 }
 declare namespace PerformanceArray {
     class PerformanceArray<T> {
