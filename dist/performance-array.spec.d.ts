@@ -35,6 +35,7 @@ declare namespace PerformanceArray {
         removeItem(item: T): void;
         updateItem(item: T): void;
         queryItemsByIndexOpts(query: TQuery, indexOpts: IPerformanceArrayIndexOptions): Array<T>;
+        createIndexFinder(): IndexFinder;
         private _createIndexNameMap;
         private _addItemToIndexNameMap;
         private _removeItemFromIndexNameMapByValue;
@@ -63,6 +64,18 @@ declare class SpecTestData {
     static fillKeyStorageWithUsers(keyStorage: PerformanceArray.KeyStorage<TSpecTestDataUser>): void;
     static generateUserList(): Array<TSpecTestDataUser>;
     static generatePerformanceArrayOptions(): PerformanceArray.IPerformanceArrayOptions;
+}
+declare namespace PerformanceArray {
+    class KeyStorageQuerier<T> {
+        private _keyStorage;
+        private _allItems;
+        private _indexFinder;
+        constructor(keyStorage: KeyStorage<T>, allItems: Array<T>);
+        executeQuery(query: TQuery): Array<T>;
+        private _getItemsForIndexOptions;
+        private _getMissingQueryProperties;
+        private _filterItemsByMissingQueryProperties;
+    }
 }
 declare namespace PerformanceArray {
     class PerformanceArray<T> {

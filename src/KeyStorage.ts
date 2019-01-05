@@ -1,6 +1,7 @@
 /// <reference path="./TQuery.ts" />
 /// <reference path="./IPerformanceArrayOptions.ts" />
 /// <reference path="./Utils.ts" />
+/// <reference path="./IndexFinder.ts" />
 
 
 namespace PerformanceArray {
@@ -57,6 +58,10 @@ namespace PerformanceArray {
       return items ? items : [];
     }
 
+    public createIndexFinder(): IndexFinder {
+      return new IndexFinder(this._options);
+    }
+    
     private _createIndexNameMap() {
       const map: TIndexNameMap<T> = {};
 

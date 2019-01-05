@@ -84,6 +84,9 @@ var PerformanceArray;
             var items = indexMap[this._generateIndexValue(query, indexOpts)];
             return items ? items : [];
         };
+        KeyStorage.prototype.createIndexFinder = function () {
+            return new PerformanceArray.IndexFinder(this._options);
+        };
         KeyStorage.prototype._createIndexNameMap = function () {
             var map = {};
             for (var _i = 0, _a = this._options.indices; _i < _a.length; _i++) {
@@ -286,6 +289,98 @@ describe('KeyStorage', function () {
         expect(oldIndexNewItem, 'to not find item in old index after updating').to.be.undefined;
         var newIndexItem = keyStorage.queryItemsByIndexOpts({ id: newId }, SpecTestData.idIndexOpts)[0];
         expect(newIndexItem, 'to find item in new index after updating').to.be.equal(SpecTestData.dara);
+    });
+});
+var PerformanceArray;
+(function (PerformanceArray) {
+    var KeyStorageQuerier = (function () {
+        function KeyStorageQuerier(keyStorage, allItems) {
+            this._keyStorage = keyStorage;
+            this._indexFinder = keyStorage.createIndexFinder();
+            this._allItems = allItems;
+        }
+        KeyStorageQuerier.prototype.executeQuery = function (query) {
+            var indexOptions = this._indexFinder.findIndexOptionsForQuery(query);
+            var items = this._getItemsForIndexOptions(query, indexOptions);
+            var missingQueryProperties = this._getMissingQueryProperties(query, indexOptions);
+            return this._filterItemsByMissingQueryProperties(items, missingQueryProperties);
+        };
+        KeyStorageQuerier.prototype._getItemsForIndexOptions = function (query, indexOptions) {
+            if (indexOptions) {
+                return this._keyStorage.queryItemsByIndexOpts(query, indexOptions);
+            }
+            else {
+                return this._allItems.slice();
+            }
+        };
+        KeyStorageQuerier.prototype._getMissingQueryProperties = function (query, indexOptions) {
+            var missingOptions = [];
+            for (var key in query) {
+                if (!query.hasOwnProperty(key)) {
+                    continue;
+                }
+                if (!indexOptions || indexOptions.propertyNames.indexOf(key) === -1) {
+                    missingOptions.push({
+                        key: key,
+                        value: PerformanceArray.Utils.normalizeUndefined(query[key])
+                    });
+                }
+            }
+            console.error(missingOptions);
+            return missingOptions;
+        };
+        KeyStorageQuerier.prototype._filterItemsByMissingQueryProperties = function (items, missingQueryProperties) {
+            if (missingQueryProperties.length === 0) {
+                return items;
+            }
+            else {
+                return items.filter(function (item) {
+                    for (var key = 0; key < missingQueryProperties.length; key++) {
+                        var missingProp = missingQueryProperties[key];
+                        if (PerformanceArray.Utils.normalizeUndefined(item[missingProp.key]) !== missingProp.value) {
+                            return false;
+                        }
+                    }
+                    return true;
+                });
+            }
+        };
+        return KeyStorageQuerier;
+    }());
+    PerformanceArray.KeyStorageQuerier = KeyStorageQuerier;
+})(PerformanceArray || (PerformanceArray = {}));
+describe('KeyStorageQuerier', function () {
+    var keyStorage = new PerformanceArray.KeyStorage(SpecTestData.generatePerformanceArrayOptions());
+    var users = SpecTestData.generateUserList();
+    var keyStorageQuerier = new PerformanceArray.KeyStorageQuerier(keyStorage, users);
+    SpecTestData.fillKeyStorageWithUsers(keyStorage);
+    it('should find frank by id', function () {
+        var result = keyStorageQuerier.executeQuery({ id: SpecTestData.frank.id });
+        expect(result).to.have.length(1, 'to only find one item');
+        expect(result[0]).to.equal(SpecTestData.frank, 'to have frank as the first item');
+    });
+    it('should find clara and dara by value', function () {
+        var result = keyStorageQuerier.executeQuery({ value: SpecTestData.clara.value });
+        expect(result).to.have.length(2, 'to only find 2 items');
+        expect(result).to.contain(SpecTestData.clara, 'to find clara');
+        expect(result).to.contain(SpecTestData.dara, 'to find dara');
+    });
+    it('should not find items with a non existing unindexedProperty', function () {
+        var result = keyStorageQuerier.executeQuery({ unindexedProperty: 'this value doesn\'t exist' });
+        expect(result).to.have.length(0, 'to not find an item');
+    });
+    it('should find max by the unindexedProperty', function () {
+        var result = keyStorageQuerier.executeQuery({ unindexedProperty: SpecTestData.max.unindexedProperty });
+        expect(result).to.have.length(1, 'to only find 1 item');
+        expect(result).to.contain(SpecTestData.max, 'to find max');
+    });
+    it('should find martin by the unindexedProperty + id', function () {
+        var result = keyStorageQuerier.executeQuery({
+            id: SpecTestData.martin.id,
+            unindexedProperty: SpecTestData.martin.unindexedProperty
+        });
+        expect(result).to.have.length(1, 'to only find 1 item');
+        expect(result).to.contain(SpecTestData.martin, 'to find martin');
     });
 });
 var PerformanceArray;
