@@ -10,7 +10,8 @@
     "noImplicitReturns": true,
     "removeComments": true,
     "noUnusedLocals": true,
-    "listEmittedFiles": true
+    "listEmittedFiles": true,
+    "types": []
   },
   "files": [
     "./src/PerformanceArray.ts"
