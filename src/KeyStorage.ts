@@ -4,11 +4,11 @@
 
 
 namespace PerformanceArray {
-  type TIndexNameMap = { [s: string]: { [s: string]: Array<any> } };
+  type TIndexNameMap<T> = { [s: string]: { [s: string]: Array<T> } };
 
-  export class KeyStorage {
+  export class KeyStorage<T> {
     private _options: IPerformanceArrayOptions;
-    private _indexNameMap: TIndexNameMap;
+    private _indexNameMap: TIndexNameMap<T>;
 
     /**
      * 
@@ -19,19 +19,19 @@ namespace PerformanceArray {
       this._createIndexNameMap();
     }
 
-    public addItem(item: any) {
+    public addItem(item: T) {
       for (const indexOpts of this._options.indices) {
         this._addItemToIndexNameMap(item, indexOpts);
       }
     }
 
-    public removeItem(item: any) {
+    public removeItem(item: T) {
       for (const indexOpts of this._options.indices) {
         this._removeItemFromIndexNameMapByValue(item, indexOpts);
       }
     }
 
-    public updateItem(item: any) {
+    public updateItem(item: T) {
       for (const indexOpts of this._options.indices) {
         const items = this.queryItemsByIndexOpts(item, indexOpts);
 
@@ -47,18 +47,18 @@ namespace PerformanceArray {
      * @param query - all propertyNames of the indexOpts have to be present in the query!
      * @param indexOpts 
      */
-    public queryItemsByIndexOpts(query: TQuery, indexOpts: IPerformanceArrayIndexOptions): Array<any> {
+    public queryItemsByIndexOpts(query: TQuery, indexOpts: IPerformanceArrayIndexOptions): Array<T> {
       const indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
       if (!indexMap) {
         throw new Error(`[PerformanceArray] index for ${JSON.stringify(indexOpts)} doesn't exist`);
       }
 
-      const items = indexMap[this._generateIndexValue(query, indexOpts)];
+      const items = indexMap[this._generateIndexValue(<any>query, indexOpts)];
       return items ? items : [];
     }
 
     private _createIndexNameMap() {
-      const map: TIndexNameMap = {};
+      const map: TIndexNameMap<T> = {};
 
       for (const indexOpts of this._options.indices) {
         const indexName: string = this._generateIndexName(indexOpts);
@@ -68,7 +68,7 @@ namespace PerformanceArray {
       this._indexNameMap = map;
     }
 
-    private _addItemToIndexNameMap(item: any, indexOpts: IPerformanceArrayIndexOptions) {
+    private _addItemToIndexNameMap(item: T, indexOpts: IPerformanceArrayIndexOptions) {
       const indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
       const indexValue = this._generateIndexValue(item, indexOpts);
 
@@ -89,7 +89,7 @@ namespace PerformanceArray {
      * @param item 
      * @param indexOpts 
      */
-    private _removeItemFromIndexNameMapByValue(item: any, indexOpts: IPerformanceArrayIndexOptions) {
+    private _removeItemFromIndexNameMapByValue(item: T, indexOpts: IPerformanceArrayIndexOptions) {
       const indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
       const indexValue = this._generateIndexValue(item, indexOpts);
 
@@ -109,7 +109,7 @@ namespace PerformanceArray {
      * @param item 
      * @param indexOpts 
      */
-    private _removeItemFromIndexNameMap(item: any, indexOpts: IPerformanceArrayIndexOptions) {
+    private _removeItemFromIndexNameMap(item: T, indexOpts: IPerformanceArrayIndexOptions) {
       const indexMap = this._indexNameMap[this._generateIndexName(indexOpts)];
 
       for (const key in indexMap) {
@@ -126,11 +126,11 @@ namespace PerformanceArray {
       }
     }
 
-    private _generateIndexValue(item: any, indexOpts: IPerformanceArrayIndexOptions): string {
-      const valueMap: { [s: string]: any } = {};
+    private _generateIndexValue(item: T, indexOpts: IPerformanceArrayIndexOptions): string {
+      const valueMap: { [s: string]: T } = {};
 
       for (const name of indexOpts.propertyNames) {
-        valueMap[name] = Utils.normalizeUndefined(item[name]);
+        valueMap[name] = Utils.normalizeUndefined((<any>item)[name]);
       }
 
       let indexValue: string;

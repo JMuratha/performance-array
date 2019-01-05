@@ -4,7 +4,7 @@
 
 describe('KeyStorage', () => {
 
-  let keyStorage: PerformanceArray.KeyStorage;
+  let keyStorage: PerformanceArray.KeyStorage<TSpecTestDataUser>;
 
   beforeEach(() => {
     keyStorage = new PerformanceArray.KeyStorage(SpecTestData.generatePerformanceArrayOptions());

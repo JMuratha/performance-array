@@ -65,7 +65,7 @@ class SpecTestData {
     propertyNames: ['name', 'value']
   };
 
-  public static fillKeyStorageWithUsers(keyStorage: PerformanceArray.KeyStorage) {
+  public static fillKeyStorageWithUsers(keyStorage: PerformanceArray.KeyStorage<TSpecTestDataUser>) {
     this.generateUserList().forEach(u => keyStorage.addItem(u));
   }
 
