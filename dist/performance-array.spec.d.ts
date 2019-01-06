@@ -78,21 +78,6 @@ declare namespace PerformanceArray {
     }
 }
 declare namespace PerformanceArray {
-    class PerformanceArray<T> {
-        private _arrayData;
-        constructor(arrayData: Array<T>);
-        item(i: number): T;
-        remove(item: T): void;
-        push(item: T): void;
-        pop(): T | undefined;
-        unshift(item: T): void;
-        shift(): T | undefined;
-        splice(index: number, deleteCount: number, ...insertItems: Array<T>): Array<T>;
-        toArray(): Array<T>;
-        readonly length: number;
-    }
-}
-declare namespace PerformanceArray {
     class PerformanceArrayOptionsValidator {
         private _options;
         private static _availableKeyInfos;
@@ -103,5 +88,32 @@ declare namespace PerformanceArray {
         private _validateArraySubType;
         private _getNameOfClass;
         private _getAvailableKeyInfoByName;
+    }
+}
+declare namespace PerformanceArray {
+    class ItemExistsError<T> extends Error {
+        item: T;
+        constructor(item: T);
+    }
+}
+declare namespace PerformanceArray {
+    class PerformanceArray<T> {
+        private _arrayData;
+        private _keyStorage;
+        private _querier;
+        constructor(arrayData: Array<T>, options: IPerformanceArrayOptions);
+        item(i: number): T;
+        remove(item: T): void;
+        push(item: T): void;
+        pop(): T | undefined;
+        unshift(item: T): void;
+        shift(): T | undefined;
+        splice(index: number, deleteCount: number, ...insertItems: Array<T>): Array<T>;
+        toArray(): Array<T>;
+        readonly length: number;
+        findItem(query: TQuery): T;
+        findItems(query: TQuery): Array<T>;
+        hasItem(item: T): boolean;
+        private _checkItemBeforeAdding;
     }
 }

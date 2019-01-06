@@ -1,40 +1,66 @@
 /// <reference path="./IPerformanceArrayOptions.ts" />
-
+/// <reference path="./PerformanceArrayOptionsValidator.ts" />
+/// <reference path="./KeyStorage.ts" />
+/// <reference path="./KeyStorageQuerier.ts" />
+/// <reference path="./ItemExistsError.ts" />
 
 namespace PerformanceArray {
   export class PerformanceArray<T> {
 
     private _arrayData: Array<T>;
+    private _keyStorage: KeyStorage<T>;
+    private _querier: KeyStorageQuerier<T>;
 
-    constructor(arrayData: Array<T>) {
+    constructor(arrayData: Array<T>, options: IPerformanceArrayOptions) {
+      const validator = new PerformanceArrayOptionsValidator(options);
+      validator.validate();
+      
       this._arrayData = arrayData;
+      this._keyStorage = new KeyStorage(options);
+      this._querier = new KeyStorageQuerier(this._keyStorage, this._arrayData);
+
+      this._arrayData.forEach(item => this._keyStorage.addItem(item));
     }
 
-    item(i: number): T {
+    public item(i: number): T {
       return this._arrayData[i];
     }
 
-    remove(item: T) {
+    public remove(item: T) {
       const index = this._arrayData.indexOf(item);
-      if (index >= 0) {
-        this._arrayData.splice(index, 1);
-      }
+      this.splice(index, 1);
     }
 
-    push(item: T) {
+    public push(item: T) {
+      this._checkItemBeforeAdding(item);
       this._arrayData.push(item);
+      this._keyStorage.addItem(item);
     }
 
-    pop(): T | undefined {
-      return this._arrayData.pop();
+    public pop(): T | undefined {
+      const item: T = this._arrayData.pop();
+
+      if (item) {
+        this._keyStorage.removeItem(item);
+      }
+
+      return item;
     }
 
-    unshift(item: T) {
+    public unshift(item: T) {
+      this._checkItemBeforeAdding(item);
       this._arrayData.unshift(item);
+      this._keyStorage.addItem(item);
     }
 
-    shift(): T | undefined {
-      return this._arrayData.shift();
+    public shift(): T | undefined {
+      const item: T = this._arrayData.shift();
+
+      if (item) {
+        this._keyStorage.removeItem(item);
+      }
+
+      return item;
     }
 
     /**
@@ -44,16 +70,54 @@ namespace PerformanceArray {
      * @param deleteCount 
      * @param insertItems 
      */
-    splice(index: number, deleteCount: number, ...insertItems: Array<T>): Array<T> {
-      return this._arrayData.splice.apply(this._arrayData, [index, deleteCount, ...insertItems]);
+    public splice(index: number, deleteCount: number, ...insertItems: Array<T>): Array<T> {
+      insertItems.forEach(item => this._checkItemBeforeAdding(item));
+
+      const spliceArgs = [index, deleteCount, ...insertItems];
+      const removedItems: Array<T> = this._arrayData.splice.apply(this._arrayData, spliceArgs);
+
+      removedItems.forEach(item => this._keyStorage.removeItem(item));
+      insertItems.forEach(item => this._keyStorage.addItem(item));
+
+      return removedItems;
     }
 
-    toArray(): Array<T> {
+    public toArray(): Array<T> {
       return this._arrayData.slice();
     }
 
-    get length(): number {
+    public get length(): number {
       return this._arrayData.length;
+    }
+
+    /**
+     * get the first item matching the query
+     * 
+     * @param {PerformanceArray.TQuery} query 
+     */
+    public findItem(query: TQuery): T {
+      //TODO: improve performance by exiting on the first item found in the querier
+      return this._querier.executeQuery(query)[0];
+    }
+
+    /**
+     * get all items matching the query
+     * 
+     * @param {PerformanceArray.TQuery} query 
+     */
+    public findItems(query: TQuery): Array<T> {
+      return this._querier.executeQuery(query);
+    }
+
+    public hasItem(item: T): boolean {
+      const items = this._querier.executeQuery(item);
+      return items.indexOf(item) >= 0;
+    }
+
+    private _checkItemBeforeAdding(item: T) {
+      if (this.hasItem(item)) {
+        throw new ItemExistsError<T>(item);
+      }
     }
   }
 }

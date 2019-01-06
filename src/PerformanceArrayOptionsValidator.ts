@@ -96,8 +96,15 @@ namespace PerformanceArray {
       return result ? result[1] : null;
     }
 
-    private _getAvailableKeyInfoByName(name: string, availableKeyInfos: Array<IAvailableKeyInfo>): IAvailableKeyInfo {
-      return availableKeyInfos.find((info) => info.name === name);
+    private _getAvailableKeyInfoByName(name: string, availableKeyInfos: Array<IAvailableKeyInfo>)
+      : IAvailableKeyInfo | undefined {
+      for (let key = 0; key < availableKeyInfos.length; key++) {
+        if (availableKeyInfos[key].name === name) {
+          return availableKeyInfos[key];
+        }
+      }
+
+      return null;
     }
   }
 }

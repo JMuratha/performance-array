@@ -326,7 +326,6 @@ var PerformanceArray;
                     });
                 }
             }
-            console.error(missingOptions);
             return missingOptions;
         };
         KeyStorageQuerier.prototype._filterItemsByMissingQueryProperties = function (items, missingQueryProperties) {
@@ -381,127 +380,6 @@ describe('KeyStorageQuerier', function () {
         });
         expect(result).to.have.length(1, 'to only find 1 item');
         expect(result).to.contain(SpecTestData.martin, 'to find martin');
-    });
-});
-var PerformanceArray;
-(function (PerformanceArray_1) {
-    var PerformanceArray = (function () {
-        function PerformanceArray(arrayData) {
-            this._arrayData = arrayData;
-        }
-        PerformanceArray.prototype.item = function (i) {
-            return this._arrayData[i];
-        };
-        PerformanceArray.prototype.remove = function (item) {
-            var index = this._arrayData.indexOf(item);
-            if (index >= 0) {
-                this._arrayData.splice(index, 1);
-            }
-        };
-        PerformanceArray.prototype.push = function (item) {
-            this._arrayData.push(item);
-        };
-        PerformanceArray.prototype.pop = function () {
-            return this._arrayData.pop();
-        };
-        PerformanceArray.prototype.unshift = function (item) {
-            this._arrayData.unshift(item);
-        };
-        PerformanceArray.prototype.shift = function () {
-            return this._arrayData.shift();
-        };
-        PerformanceArray.prototype.splice = function (index, deleteCount) {
-            var insertItems = [];
-            for (var _i = 2; _i < arguments.length; _i++) {
-                insertItems[_i - 2] = arguments[_i];
-            }
-            return this._arrayData.splice.apply(this._arrayData, [index, deleteCount].concat(insertItems));
-        };
-        PerformanceArray.prototype.toArray = function () {
-            return this._arrayData.slice();
-        };
-        Object.defineProperty(PerformanceArray.prototype, "length", {
-            get: function () {
-                return this._arrayData.length;
-            },
-            enumerable: true,
-            configurable: true
-        });
-        return PerformanceArray;
-    }());
-    PerformanceArray_1.PerformanceArray = PerformanceArray;
-})(PerformanceArray || (PerformanceArray = {}));
-describe('PerformanceArray', function () {
-    var testData;
-    var performanceArray;
-    beforeEach(function () {
-        testData = [
-            {
-                id: 1,
-                value: 10,
-            },
-            {
-                id: 2,
-                value: 11,
-            }, {
-                id: 3,
-                value: 12,
-            }, {
-                id: 4,
-                value: 13,
-            }, {
-                id: 5,
-                value: 14,
-            }
-        ];
-        performanceArray = new PerformanceArray.PerformanceArray(testData);
-    });
-    it('should be convertible to an array', function () {
-        var resultData = performanceArray.toArray();
-        testData.forEach(function (item, index) {
-            expect(item).to.be.equal(resultData[index], "data at index " + index + " is equal");
-        });
-        expect(testData).to.not.be.equal(resultData, 'result array should not be equal to input array');
-    });
-    it('can access items at a certain index', function () {
-        expect(testData[0]).to.be.equal(performanceArray.item(0), 'item at index 2 is the same');
-        expect(testData[2]).to.be.equal(performanceArray.item(2), 'item at index 2 is the same');
-        expect(performanceArray.item(5000), 'item at out of bounds index is undefined').to.be.undefined;
-    });
-    it('can push a new item', function () {
-        var item = { id: 100, value: 5482 };
-        performanceArray.push(item);
-        expect(performanceArray.item(performanceArray.length - 1)).to.be.equal(item);
-    });
-    it('can pop an item', function () {
-        var item = performanceArray.item(performanceArray.length - 1);
-        var oldLength = performanceArray.length;
-        var poppedItem = performanceArray.pop();
-        expect(poppedItem).to.be.equal(item);
-        expect(performanceArray.length).to.be.equal(oldLength - 1);
-    });
-    it('can shift an item', function () {
-        var item = performanceArray.item(0);
-        var oldLength = performanceArray.length;
-        var shiftedItem = performanceArray.shift();
-        expect(shiftedItem).to.be.equal(item);
-        expect(performanceArray.length).to.be.equal(oldLength - 1);
-    });
-    it('can unshift a new item', function () {
-        var item = { id: 100, value: 5482 };
-        var oldLength = performanceArray.length;
-        performanceArray.unshift(item);
-        expect(performanceArray.item(0)).to.be.equal(item);
-        expect(performanceArray.length).to.be.equal(oldLength + 1);
-    });
-    it('can splice items', function () {
-        var newItem = { id: 100, value: 5482 };
-        var oldLength = performanceArray.length;
-        var itemThatShouldBeRemoved = performanceArray.item(2);
-        var removedItems = performanceArray.splice(2, 1, newItem);
-        expect(removedItems[0], 'removed the correct item').to.be.equal(itemThatShouldBeRemoved);
-        expect(performanceArray.length).to.be.equal(oldLength);
-        expect(performanceArray.item(2), 'added the new item at the correct index').to.be.equal(newItem);
     });
 });
 var PerformanceArray;
@@ -563,7 +441,12 @@ var PerformanceArray;
             return result ? result[1] : null;
         };
         PerformanceArrayOptionsValidator.prototype._getAvailableKeyInfoByName = function (name, availableKeyInfos) {
-            return availableKeyInfos.find(function (info) { return info.name === name; });
+            for (var key = 0; key < availableKeyInfos.length; key++) {
+                if (availableKeyInfos[key].name === name) {
+                    return availableKeyInfos[key];
+                }
+            }
+            return null;
         };
         PerformanceArrayOptionsValidator._availableKeyInfos = [
             {
@@ -582,6 +465,182 @@ var PerformanceArray;
     }());
     PerformanceArray.PerformanceArrayOptionsValidator = PerformanceArrayOptionsValidator;
 })(PerformanceArray || (PerformanceArray = {}));
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
+var PerformanceArray;
+(function (PerformanceArray) {
+    var ItemExistsError = (function (_super) {
+        __extends(ItemExistsError, _super);
+        function ItemExistsError(item) {
+            var _this = _super.call(this, 'The item has already been added') || this;
+            _this.item = item;
+            return _this;
+        }
+        return ItemExistsError;
+    }(Error));
+    PerformanceArray.ItemExistsError = ItemExistsError;
+})(PerformanceArray || (PerformanceArray = {}));
+var PerformanceArray;
+(function (PerformanceArray_1) {
+    var PerformanceArray = (function () {
+        function PerformanceArray(arrayData, options) {
+            var _this = this;
+            var validator = new PerformanceArray_1.PerformanceArrayOptionsValidator(options);
+            validator.validate();
+            this._arrayData = arrayData;
+            this._keyStorage = new PerformanceArray_1.KeyStorage(options);
+            this._querier = new PerformanceArray_1.KeyStorageQuerier(this._keyStorage, this._arrayData);
+            this._arrayData.forEach(function (item) { return _this._keyStorage.addItem(item); });
+        }
+        PerformanceArray.prototype.item = function (i) {
+            return this._arrayData[i];
+        };
+        PerformanceArray.prototype.remove = function (item) {
+            var index = this._arrayData.indexOf(item);
+            this.splice(index, 1);
+        };
+        PerformanceArray.prototype.push = function (item) {
+            this._checkItemBeforeAdding(item);
+            this._arrayData.push(item);
+            this._keyStorage.addItem(item);
+        };
+        PerformanceArray.prototype.pop = function () {
+            var item = this._arrayData.pop();
+            if (item) {
+                this._keyStorage.removeItem(item);
+            }
+            return item;
+        };
+        PerformanceArray.prototype.unshift = function (item) {
+            this._checkItemBeforeAdding(item);
+            this._arrayData.unshift(item);
+            this._keyStorage.addItem(item);
+        };
+        PerformanceArray.prototype.shift = function () {
+            var item = this._arrayData.shift();
+            if (item) {
+                this._keyStorage.removeItem(item);
+            }
+            return item;
+        };
+        PerformanceArray.prototype.splice = function (index, deleteCount) {
+            var _this = this;
+            var insertItems = [];
+            for (var _i = 2; _i < arguments.length; _i++) {
+                insertItems[_i - 2] = arguments[_i];
+            }
+            insertItems.forEach(function (item) { return _this._checkItemBeforeAdding(item); });
+            var spliceArgs = [index, deleteCount].concat(insertItems);
+            var removedItems = this._arrayData.splice.apply(this._arrayData, spliceArgs);
+            removedItems.forEach(function (item) { return _this._keyStorage.removeItem(item); });
+            insertItems.forEach(function (item) { return _this._keyStorage.addItem(item); });
+            return removedItems;
+        };
+        PerformanceArray.prototype.toArray = function () {
+            return this._arrayData.slice();
+        };
+        Object.defineProperty(PerformanceArray.prototype, "length", {
+            get: function () {
+                return this._arrayData.length;
+            },
+            enumerable: true,
+            configurable: true
+        });
+        PerformanceArray.prototype.findItem = function (query) {
+            return this._querier.executeQuery(query)[0];
+        };
+        PerformanceArray.prototype.findItems = function (query) {
+            return this._querier.executeQuery(query);
+        };
+        PerformanceArray.prototype.hasItem = function (item) {
+            var items = this._querier.executeQuery(item);
+            return items.indexOf(item) >= 0;
+        };
+        PerformanceArray.prototype._checkItemBeforeAdding = function (item) {
+            if (this.hasItem(item)) {
+                throw new PerformanceArray_1.ItemExistsError(item);
+            }
+        };
+        return PerformanceArray;
+    }());
+    PerformanceArray_1.PerformanceArray = PerformanceArray;
+})(PerformanceArray || (PerformanceArray = {}));
+describe('PerformanceArray', function () {
+    var userList;
+    var performanceArray;
+    beforeEach(function () {
+        userList = SpecTestData.generateUserList();
+        performanceArray = new PerformanceArray.PerformanceArray(userList, SpecTestData.generatePerformanceArrayOptions());
+    });
+    it('should be convertible to an array', function () {
+        var resultData = performanceArray.toArray();
+        userList.forEach(function (item, index) {
+            expect(item).to.be.equal(resultData[index], "data at index " + index + " is equal");
+        });
+        expect(userList).to.not.be.equal(resultData, 'result array should not be equal to input array');
+    });
+    it('can access items at a certain index', function () {
+        expect(userList[0]).to.be.equal(performanceArray.item(0), 'item at index 2 is the same');
+        expect(userList[2]).to.be.equal(performanceArray.item(2), 'item at index 2 is the same');
+        expect(performanceArray.item(5000), 'item at out of bounds index is undefined').to.be.undefined;
+    });
+    it('can push a new item', function () {
+        var item = { id: 101010, name: 'new user', value: 70, unindexedProperty: 'whatever' };
+        performanceArray.push(item);
+        expect(performanceArray.item(performanceArray.length - 1)).to.be.equal(item, 'item is the last item');
+        expect(performanceArray.findItem({ id: item.id })).to.be.equal(item, 'item can be correctly found');
+    });
+    it('can pop an item', function () {
+        var item = performanceArray.item(performanceArray.length - 1);
+        var oldLength = performanceArray.length;
+        var poppedItem = performanceArray.pop();
+        expect(poppedItem).to.be.equal(item, 'popped item was the last item');
+        expect(performanceArray.length).to.be.equal(oldLength - 1, 'arrays length decreased by one');
+        expect(performanceArray.findItem({ id: poppedItem.id })).to.be.equal(undefined, 'item cannot be found anymore');
+    });
+    it('can shift an item', function () {
+        var item = performanceArray.item(0);
+        var oldLength = performanceArray.length;
+        var shiftedItem = performanceArray.shift();
+        expect(shiftedItem).to.be.equal(item, 'shifted item is the first item');
+        expect(performanceArray.length).to.be.equal(oldLength - 1, 'arrays length decreased by one');
+        expect(performanceArray.findItem({ id: shiftedItem.id })).to.be.equal(undefined, 'item cannot be found anymore');
+    });
+    it('can unshift a new item', function () {
+        var item = { id: 101010, name: 'new user', value: 70, unindexedProperty: 'whatever' };
+        var oldLength = performanceArray.length;
+        performanceArray.unshift(item);
+        expect(performanceArray.item(0)).to.be.equal(item, 'item has been inserted at index 0');
+        expect(performanceArray.length).to.be.equal(oldLength + 1, 'arrays length increased by one');
+        expect(performanceArray.findItem({ id: item.id })).to.be.equal(item, 'item can be correctly found');
+    });
+    it('can splice items', function () {
+        var newItem = { id: 101010, name: 'new user', value: 70, unindexedProperty: 'whatever' };
+        var oldLength = performanceArray.length;
+        var itemThatShouldBeRemoved = performanceArray.item(2);
+        var removedItem = performanceArray.splice(2, 1, newItem)[0];
+        expect(removedItem).to.be.equal(itemThatShouldBeRemoved, 'removed the correct item');
+        expect(performanceArray.findItem({ id: removedItem.id })).to.be.equal(undefined, 'item cannot be found anymore');
+        expect(performanceArray.length).to.be.equal(oldLength, 'array has the same length as before');
+        expect(performanceArray.item(2)).to.be.equal(newItem, 'added the new item at the correct index');
+        expect(performanceArray.findItem({ id: newItem.id })).to.be.equal(newItem, 'new item can be correctly found');
+    });
+    it('throws an error on adding an existing item', function () {
+        var pushFunction = performanceArray.push.bind(performanceArray, SpecTestData.clara);
+        expect(pushFunction).to.throw(/The item has already been added/, 'can\'t add an existing item');
+    });
+});
 describe('PerformanceArrayOptionsValidator', function () {
     it('should allow and empty object', function () {
         var validator = new PerformanceArray.PerformanceArrayOptionsValidator({});

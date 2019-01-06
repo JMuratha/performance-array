@@ -1,53 +1,37 @@
 /// <reference path="./PerformanceArray.ts" />
 /// <reference path="./specImports.spec.ts" />
+/// <reference path="./SpecTestData.spec.ts" />
 
 describe('PerformanceArray', () => {
-  let testData: Array<{ id: number, value: number }>;
-  let performanceArray: PerformanceArray.PerformanceArray<{ id: number, value: number }>;
+  let userList: Array<TSpecTestDataUser>;
+  let performanceArray: PerformanceArray.PerformanceArray<TSpecTestDataUser>;
 
   beforeEach(() => {
-    testData = [
-      {
-        id: 1,
-        value: 10,
-      },
-      {
-        id: 2,
-        value: 11,
-      }, {
-        id: 3,
-        value: 12,
-      }, {
-        id: 4,
-        value: 13,
-      }, {
-        id: 5,
-        value: 14,
-      }
-    ];
-
-    performanceArray = new PerformanceArray.PerformanceArray(testData);
+    userList = SpecTestData.generateUserList();
+    performanceArray = new PerformanceArray.PerformanceArray(userList, SpecTestData.generatePerformanceArrayOptions());
   });
+
   it('should be convertible to an array', () => {
     const resultData = performanceArray.toArray();
 
-    testData.forEach((item, index) => {
+    userList.forEach((item, index) => {
       expect(item).to.be.equal(resultData[index], `data at index ${index} is equal`);
     });
 
-    expect(testData).to.not.be.equal(resultData, 'result array should not be equal to input array');
+    expect(userList).to.not.be.equal(resultData, 'result array should not be equal to input array');
   });
 
   it('can access items at a certain index', () => {
-    expect(testData[0]).to.be.equal(performanceArray.item(0), 'item at index 2 is the same');
-    expect(testData[2]).to.be.equal(performanceArray.item(2), 'item at index 2 is the same');
+    expect(userList[0]).to.be.equal(performanceArray.item(0), 'item at index 2 is the same');
+    expect(userList[2]).to.be.equal(performanceArray.item(2), 'item at index 2 is the same');
     expect(performanceArray.item(5000), 'item at out of bounds index is undefined').to.be.undefined;
   });
 
   it('can push a new item', () => {
-    const item = { id: 100, value: 5482 };
+    const item: TSpecTestDataUser = { id: 101010, name: 'new user', value: 70, unindexedProperty: 'whatever' };
     performanceArray.push(item);
-    expect(performanceArray.item(performanceArray.length - 1)).to.be.equal(item);
+    expect(performanceArray.item(performanceArray.length - 1)).to.be.equal(item, 'item is the last item');
+    expect(performanceArray.findItem({ id: item.id })).to.be.equal(item, 'item can be correctly found');
   });
 
   it('can pop an item', () => {
@@ -55,8 +39,9 @@ describe('PerformanceArray', () => {
     const oldLength = performanceArray.length;
 
     const poppedItem = performanceArray.pop();
-    expect(poppedItem).to.be.equal(item);
-    expect(performanceArray.length).to.be.equal(oldLength - 1);
+    expect(poppedItem).to.be.equal(item, 'popped item was the last item');
+    expect(performanceArray.length).to.be.equal(oldLength - 1, 'arrays length decreased by one');
+    expect(performanceArray.findItem({ id: poppedItem.id })).to.be.equal(undefined, 'item cannot be found anymore');
   });
 
   it('can shift an item', () => {
@@ -64,26 +49,35 @@ describe('PerformanceArray', () => {
     const oldLength = performanceArray.length;
 
     const shiftedItem = performanceArray.shift();
-    expect(shiftedItem).to.be.equal(item);
-    expect(performanceArray.length).to.be.equal(oldLength - 1);
+    expect(shiftedItem).to.be.equal(item, 'shifted item is the first item');
+    expect(performanceArray.length).to.be.equal(oldLength - 1, 'arrays length decreased by one');
+    expect(performanceArray.findItem({ id: shiftedItem.id })).to.be.equal(undefined, 'item cannot be found anymore');
   });
 
   it('can unshift a new item', () => {
-    const item = { id: 100, value: 5482 };
+    const item = { id: 101010, name: 'new user', value: 70, unindexedProperty: 'whatever' };
     const oldLength = performanceArray.length;
     performanceArray.unshift(item);
-    expect(performanceArray.item(0)).to.be.equal(item);
-    expect(performanceArray.length).to.be.equal(oldLength + 1);
+    expect(performanceArray.item(0)).to.be.equal(item, 'item has been inserted at index 0');
+    expect(performanceArray.length).to.be.equal(oldLength + 1, 'arrays length increased by one');
+    expect(performanceArray.findItem({ id: item.id })).to.be.equal(item, 'item can be correctly found');
   });
 
   it('can splice items', () => {
-    const newItem = { id: 100, value: 5482 };
+    const newItem = { id: 101010, name: 'new user', value: 70, unindexedProperty: 'whatever' };
     const oldLength = performanceArray.length;
     const itemThatShouldBeRemoved = performanceArray.item(2);
-    const removedItems = performanceArray.splice(2, 1, newItem);
+    const removedItem = performanceArray.splice(2, 1, newItem)[0];
 
-    expect(removedItems[0], 'removed the correct item').to.be.equal(itemThatShouldBeRemoved);
-    expect(performanceArray.length).to.be.equal(oldLength);
-    expect(performanceArray.item(2), 'added the new item at the correct index').to.be.equal(newItem);
+    expect(removedItem).to.be.equal(itemThatShouldBeRemoved, 'removed the correct item');
+    expect(performanceArray.findItem({ id: removedItem.id })).to.be.equal(undefined, 'item cannot be found anymore');
+    expect(performanceArray.length).to.be.equal(oldLength, 'array has the same length as before');
+    expect(performanceArray.item(2)).to.be.equal(newItem, 'added the new item at the correct index');
+    expect(performanceArray.findItem({ id: newItem.id })).to.be.equal(newItem, 'new item can be correctly found');
+  });
+
+  it('throws an error on adding an existing item', () => {
+    const pushFunction: Function = performanceArray.push.bind(performanceArray, SpecTestData.clara);
+    expect(pushFunction).to.throw(/The item has already been added/, 'can\'t add an existing item');
   });
 });
