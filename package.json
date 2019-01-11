@@ -7,7 +7,8 @@
     "tslint": "npx tslint ./src/**/*.ts",
     "test": "npx tsc -p tsconfig.spec.json && npx mocha ./dist/performance-array.spec.js",
     "build": "npx tsc",
-    "build-watch": "npx tsc --watch"
+    "build-watch": "npx tsc --watch",
+    "performance-test": "npx karma start ./performanceTest/karma.conf.js"
   },
   "repository": {
     "type": "git",
@@ -30,6 +31,10 @@
     "@types/mocha": "^5.2.5",
     "@types/node": "^10.10.1",
     "chai": "^4.2.0",
+    "karma": "^3.1.4",
+    "karma-phantomjs-launcher": "^1.0.4",
+    "phantomjs": "^2.1.7",
+    "phantomjs-polyfill-find": "0.0.1",
     "tslint": "^5.12.0",
     "typescript": "^3.2.0"
   }
